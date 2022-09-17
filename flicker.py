@@ -6,6 +6,7 @@ import os
 import time
 import math
 import argparse
+import random
 
 SCREEN_WIDTH = 10
 SCREEN_HEIGHT = 10
@@ -32,15 +33,23 @@ def loop(step_func, step_dur):
             clear()
 
 def fire(screen, step):
+    middle_point = math.floor(SCREEN_WIDTH / 2 + random.randrange(-1,1))
     cur_sin = abs(math.sin(step / math.pi))
     max_fire_height = math.ceil(cur_sin * SCREEN_HEIGHT)
     # print(cur_sin, max_fire_height)
-    for i in range(0, max_fire_height):
-        row = SCREEN_HEIGHT - i - 1
-        screen[row] = [FIRE] * SCREEN_WIDTH
+    for i in range(SCREEN_HEIGHT):
+        screen_i = SCREEN_HEIGHT - i - 1
+        if i <= max_fire_height:
+            for k in range(middle_point):
+                if max_fire_height / middle_point * k > i:
+                    screen[screen_i][k] = FIRE
+
+            for k in range(middle_point, SCREEN_WIDTH):
+                if -max_fire_height / (SCREEN_WIDTH - middle_point) * (k - middle_point) + max_fire_height > i:
+                    screen[screen_i][k] = FIRE
 
 def step(step_count):
-    screen = [["  "] * SCREEN_WIDTH] * SCREEN_HEIGHT
+    screen = [["  "] * SCREEN_WIDTH for i in range(SCREEN_HEIGHT)]
     fire(screen, step_count)
     print("⬜" * (SCREEN_WIDTH + 2))
     for row in screen:
