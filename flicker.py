@@ -7,6 +7,7 @@ import time
 import math
 import argparse
 import random
+import screen
 
 SCREEN_WIDTH = 10
 SCREEN_HEIGHT = 10
@@ -20,6 +21,8 @@ parser.add_argument('--stepdur', help="how long between steps")
 
 args = parser.parse_args()
 
+play_screen = screen.Screen(SCREEN_WIDTH, SCREEN_HEIGHT, "  ")
+
 def clear():
     os.system('clear')
 
@@ -32,7 +35,7 @@ def loop(step_func, step_dur):
         if not args.showsteps:
             clear()
 
-def fire(screen, step):
+def fire(play_screen, step):
     middle_point = math.floor(SCREEN_WIDTH / 2 + random.randrange(-1,1))
     cur_sin = abs(math.sin(step / math.pi))
     max_fire_height = math.ceil(cur_sin * SCREEN_HEIGHT)
@@ -42,18 +45,15 @@ def fire(screen, step):
         if i <= max_fire_height:
             for k in range(middle_point):
                 if max_fire_height / middle_point * k > i:
-                    screen[screen_i][k] = FIRE
+                    play_screen.set(k, screen_i, FIRE)
 
             for k in range(middle_point, SCREEN_WIDTH):
                 if -max_fire_height / (SCREEN_WIDTH - middle_point) * (k - middle_point) + max_fire_height > i:
-                    screen[screen_i][k] = FIRE
+                    play_screen.set(k, screen_i, FIRE)
 
 def step(step_count):
-    screen = [["  "] * SCREEN_WIDTH for i in range(SCREEN_HEIGHT)]
-    fire(screen, step_count)
-    print("⬜" * (SCREEN_WIDTH + 2))
-    for row in screen:
-        print("⬜" + "".join(row) + "⬜")
-    print("⬜" * (SCREEN_WIDTH + 2))
+    play_screen.clear()
+    fire(play_screen, step_count)
+    play_screen.print()
 
 loop(step, float(args.stepdur or 1))
