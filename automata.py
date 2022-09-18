@@ -27,6 +27,7 @@ class Range:
 
 ADD_RANGE = Range(3,3)
 SURVIVE_RANGE = Range(2,3)
+TOLERANCE = 2
 
 play_screen = screen.Screen(SCREEN_WIDTH, SCREEN_HEIGHT, "  ")
 
@@ -44,13 +45,14 @@ When we step the simulation, we create the new state on the inactive board
 then switch the inactive board to be the active one.
 """
 class CellSim:
-    def __init__(self, width, height, add_range, survive_range, cell_chance):
+    def __init__(self, width, height, add_range, survive_range, cell_chance, tolerance):
         self._sim_boards = [[[False] * width for i in range(height)] for k in range(2)]
         self._sim_board_x_range = Range(0, width - 1)
         self._sim_board_y_range = Range(0, height - 1)
         self._active_board_idx = 0
         self._add_range = add_range
         self._survive_range = survive_range
+        self._tolerance = tolerance
 
         for y in range(height):
             for x in range(width):
@@ -74,13 +76,16 @@ class CellSim:
     def step_sim(self):
         for y in range(len(self._active_board)):
             for x in range(len(self._active_board[0])):
+                tolerance = y / len(self._active_board) * self._tolerance
+                survive_range = Range(self._survive_range.min - tolerance, self._survive_range.max + tolerance)
+                add_range = Range(self._add_range.min - tolerance, self._add_range.max + tolerance)
                 self._inactive_board[y][x] = False
                 neighbors = self._get_num_neighbors(x, y)
                 if self._is_alive(x, y):
-                    if self._survive_range.is_in_range(neighbors):
+                    if survive_range.is_in_range(neighbors):
                         self._inactive_board[y][x] = True
                 else:
-                    if self._add_range.is_in_range(neighbors):
+                    if add_range.is_in_range(neighbors):
                         self._inactive_board[y][x] = True
 
         self._active_board_idx = (1 + self._active_board_idx) % 2
@@ -96,7 +101,7 @@ class CellSim:
     def get_state(self):
         return self._active_board
 
-cell_sim = CellSim(SCREEN_WIDTH, SCREEN_HEIGHT, ADD_RANGE, SURVIVE_RANGE, CELL_CHANCE)
+cell_sim = CellSim(SCREEN_WIDTH, SCREEN_HEIGHT, ADD_RANGE, SURVIVE_RANGE, CELL_CHANCE, TOLERANCE)
 
 def step(step_count):
     play_screen.clear()
