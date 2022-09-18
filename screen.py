@@ -10,8 +10,16 @@ class Screen:
         self.board = [[self.empty_square] * self.width for i in range(self.height)]
 
     # (0,0) top left corner
-    def set(self, x, y, set_to_string):
+    def set_point(self, x, y, set_to_string):
         self.board[y][x] = set_to_string
+
+    def set_board(self, board):
+        if len(board) != self.height or len(board[0]) != self.width:
+            raise Exception(f"board must match screen dimensions width: {self.width} height: {self.height}")
+        for i in range(self.height):
+            for k in range(self.width):
+                if board[i][k] != None:
+                    self.board[i][k] = board[i][k]
     
     def print(self):
         print("⬜" * (self.width + 2))
